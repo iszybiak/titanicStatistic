@@ -1,46 +1,51 @@
 import pandas as pd
-import os
-
-from fontTools.misc.cython import returns
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from src.logger import setup_logger
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from src.data_loader import load_data
 
 logger = setup_logger()
 
-def load_data(filepath: str) -> pd.DataFrame:
-    df = pd.read_csv(filepath)
-    print(df.info())
-    return pd.read_csv(filepath)
-
 def handle_missing_data(data: pd.DataFrame) -> pd.DataFrame:
-    """Checks for missing values and fills them with appropriate values.
-        From the report I received information about missing individual data:
-        INFO - Missing values:  Age         177
-                                Embarked      2
-        The code below focuses on completing this data.
-    """
-    # Checking for missing data in the entire set
-    missing_data = data.isnull().sum()
-    logger.info(f'Missing values: {missing_data[missing_data > 0]}')
+    """Checks for missing values and fills them with appropriate values."""
 
-    if missing_data.any():
-        if 'Age' in missing_data.columns:
-            # Filling in the missing 'Age', average Age.
-            data.fillna(data['Age'].mean(), inplace=True)
-        if 'Embarked' in missing_data.columns:
-            # Filling in the missing 'Embarked', value that appears most often in Embarked.
-            data.fillna(data['Embarked'].mode()[0], inplace=True)
-        logger.info("The missing data has been filled in.")
-    else:
-        logger.info("The collection is complete. It has no missing data")
+    # Completing numerical values with mean
+    num_imputer = SimpleImputer(strategy="mean")
+    data[['Age', 'Fare']] = num_imputer.fit_transform(data[['Age', 'Fare']])
+
+    # Completing categorical values with the most frequently occurring value
+    cat_imputer = SimpleImputer(strategy="most_frequent")
+    data[['Embarked']] = cat_imputer.fit_transform(data[['Embarked']])
+
+    logger.info("Missing data have been corrected.")
     return data
 
 def encode_categorical_features(data: pd.DataFrame) -> pd.DataFrame:
-    """Coding of categorical variables"""
-    data = pd.get_dummies(data, columns=['Sex', 'Embarked'], drop_first=True)
+    """Coding of categorical variables using OneHotEncoder"""
+    categorical_features = ['Sex', 'Embarked']
+    encoder = OneHotEncoder(drop="first", handle_unknown="ignore")
+
+    encoded_data = encoder.fit_transform(data[categorical_features]).toarray()
+    encoded_df = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(categorical_features))
+
+    data = data.drop(columns=categorical_features).reset_index(drop=True)
+    data = pd.concat([data, encoded_df], axis=1)
+
+    logger.info("Categorical variables have been encoded.")
+
     return data
+
+def scale_numeric_features(data: pd.DataFrame) -> pd.DataFrame:
+    """ Scale ... """
+    numeric_features = ['Age', 'Fare']
+    scaler = StandardScaler()
+
+    data[numeric_features] = scaler.fit_transform(data[numeric_features])
+    logger.info("Numeric variables have been scaled.")
+    return data
+
 
 def split_data(data: pd.DataFrame, target_column: str):
     """Division of data into features (X) and labels (y)"""
@@ -53,13 +58,12 @@ def preprocess(filepath: str, target: str):
     data = load_data(filepath)
     data = handle_missing_data(data)
     data = encode_categorical_features(data)
+    data = scale_numeric_features(data)
     X_train, X_test, y_train, y_test = split_data(data, target)
     return X_train, X_test, y_train, y_test
 
 # if __name__ == '__main__':
-#     train_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'train.csv')
-#     X_train, X_test, y_train, y_test = preprocess(train_file, 'Survived')
-
+#     X_train, X_test, y_train, y_test = preprocess('../data/train.csv', 'Survived')
 
 
 

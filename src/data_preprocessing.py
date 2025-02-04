@@ -22,9 +22,29 @@ def handle_missing_data(data: pd.DataFrame) -> pd.DataFrame:
     logger.info("Missing data have been corrected.")
     return data
 
+def extract_features(data: pd.DataFrame) -> pd.DataFrame:
+    """ Dd"""
+    data['Title'] = data['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False)
+
+    # Mapa upraszczająca tytuły
+    title_map = {
+        'Mr': 'Mr', 'Miss': 'Miss', 'Mrs': 'Mrs', 'Master': 'Master',
+        'Don': 'Mr', 'Rev': 'Rare', 'Dr': 'Rare', 'Major': 'Rare', 'Col': 'Rare',
+        'Capt': 'Rare', 'Jonkheer': 'Rare', 'Sir': 'Rare',
+        'Mlle': 'Miss', 'Mme': 'Mrs', 'Lady': 'Mrs', 'Countess': 'Mrs', 'Dona': 'Mrs'
+    }
+
+    # Zamiana tytułów na uproszczone
+    data['Title'] = data['Title'].map(title_map).fillna('Rare')
+
+    # Removing the original column
+    data.drop(columns=['Name'], inplace=True)
+
+    return data
+
 def encode_categorical_features(data: pd.DataFrame) -> pd.DataFrame:
     """Coding of categorical variables using OneHotEncoder"""
-    categorical_features = ['Sex', 'Embarked']
+    categorical_features = ['Sex', 'Embarked', 'Title']
     encoder = OneHotEncoder(drop="first", handle_unknown="ignore")
 
     encoded_data = encoder.fit_transform(data[categorical_features]).toarray()
@@ -53,14 +73,22 @@ def split_data(data: pd.DataFrame, target_column: str):
     y = data[target_column]
     return train_test_split(X, y, test_size=0.2, random_state=42)
 
-def preprocess(filepath: str, target: str):
-    """Processes data and returns training and test sets."""
+def preprocess(filepath: str, target: str, data_type: str):
+    """Processes data and returns appropriate dataset based on type."""
     data = load_data(filepath)
     data = handle_missing_data(data)
+    data = extract_features(data)
     data = encode_categorical_features(data)
     data = scale_numeric_features(data)
-    X_train, X_test, y_train, y_test = split_data(data, target)
-    return X_train, X_test, y_train, y_test
+
+    if data_type == 'train':
+        X_train, X_test, y_train, y_test = split_data(data, target)
+        return X_train, X_test, y_train, y_test
+    elif data_type == 'test':
+        return data.drop(columns=[target], errors='ignore')
+    else:
+        raise ValueError("Invalid data_type. Choose 'train' or 'test'.")
+
 
 # if __name__ == '__main__':
 #     X_train, X_test, y_train, y_test = preprocess('../data/train.csv', 'Survived')

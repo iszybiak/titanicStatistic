@@ -1,0 +1,8 @@
+{
+    "data_path": "../data/train.csv",
+    "test_path": "../data/test.csv",
+    "report_path": "../report.txt",
+    "model_path": "../models/trained_model.pkl",
+    "target": "Survived",
+    "test_predictions_output": "predictions.csv"
+}

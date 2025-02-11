@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 # Set up logger
 logger = logging.getLogger('config_loader')
@@ -9,7 +10,10 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-def load_config(config_path="../config.json"):
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Przechodzi do głównego katalogu
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+def load_config(config_path=CONFIG_PATH):
     """Load configuration from a JSON file."""
     try:
         with open(config_path, "r") as config_file:

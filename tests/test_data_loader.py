@@ -1,12 +1,15 @@
 import pytest
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.data_loader import load_data
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..')))
+
 
 def test_load_data(tmp_path):
     test_file = tmp_path / "test_data.csv"
-    test_file.write_text("Name,Age,Fare,Embarked\nJohn,22,7.25,S\nAlice,35,71.83,C")
+    test_file.write_text(
+        "Name,Age,Fare,Embarked\nJohn,22,7.25,S\nAlice,35,71.83,C")
 
     df = load_data(str(test_file))
 

@@ -4,7 +4,6 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from src.logger import setup_logger
 from src.data_loader import load_data
-import logging
 
 # Setup logger
 logger = setup_logger()
@@ -15,9 +14,11 @@ def handle_missing_data(data: pd.DataFrame) -> pd.DataFrame:
     try:
         # Completing numerical values with mean
         num_imputer = SimpleImputer(strategy="mean")
-        data[['Age', 'Fare']] = num_imputer.fit_transform(data[['Age', 'Fare']])
+        data[['Age', 'Fare']] = num_imputer.fit_transform(
+            data[['Age', 'Fare']])
 
-        # Completing categorical values with the most frequently occurring value
+        # Completing categorical values with the most frequently occurring
+        # value
         cat_imputer = SimpleImputer(strategy="most_frequent")
         data[['Embarked']] = cat_imputer.fit_transform(data[['Embarked']])
 
@@ -34,7 +35,8 @@ def extract_features(data: pd.DataFrame) -> pd.DataFrame:
         if 'Name' not in data.columns:
             raise ValueError("Missing 'Name' column in data.")
 
-        data['Title'] = data['Name'].str.extract(r' ([A-Za-z]+)\.', expand=False)
+        data['Title'] = data['Name'].str.extract(
+            r' ([A-Za-z]+)\.', expand=False)
 
         # Simplifying titles
         title_map = {
@@ -61,11 +63,15 @@ def encode_categorical_features(data: pd.DataFrame) -> pd.DataFrame:
         categorical_features = ['Sex', 'Embarked', 'Title']
 
         if not all(feature in data.columns for feature in categorical_features):
-            raise ValueError(f"Missing one or more categorical features: {categorical_features}")
+            raise ValueError(
+                f"Missing one or more categorical features: {categorical_features}")
 
         encoder = OneHotEncoder(drop="first", handle_unknown="ignore")
-        encoded_data = encoder.fit_transform(data[categorical_features]).toarray()
-        encoded_df = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(categorical_features))
+        encoded_data = encoder.fit_transform(
+            data[categorical_features]).toarray()
+        encoded_df = pd.DataFrame(
+            encoded_data,
+            columns=encoder.get_feature_names_out(categorical_features))
 
         # Dropping original categorical columns and adding encoded columns
         data = data.drop(columns=categorical_features).reset_index(drop=True)
@@ -84,7 +90,8 @@ def scale_numeric_features(data: pd.DataFrame) -> pd.DataFrame:
         numeric_features = ['Age', 'Fare']
 
         if not all(feature in data.columns for feature in numeric_features):
-            raise ValueError(f"Missing one or more numeric features: {numeric_features}")
+            raise ValueError(
+                f"Missing one or more numeric features: {numeric_features}")
 
         scaler = StandardScaler()
         data[numeric_features] = scaler.fit_transform(data[numeric_features])
@@ -100,7 +107,8 @@ def split_data(data: pd.DataFrame, target_column: str):
     """Splits data into features (X) and target (y), then returns train-test split."""
     try:
         if target_column not in data.columns:
-            raise ValueError(f"Target column '{target_column}' not found in data.")
+            raise ValueError(
+                f"Target column '{target_column}' not found in data.")
 
         X = data.drop(columns=[target_column])
         y = data[target_column]
@@ -129,4 +137,3 @@ def preprocess(filepath: str, target: str, data_type: str):
     except Exception as e:
         logger.error(f"Error during preprocessing: {e}")
         raise
-

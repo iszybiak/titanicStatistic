@@ -1,8 +1,9 @@
 import pandas as pd
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.data_preprocessing import handle_missing_data, extract_features, encode_categorical_features
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..')))
 
 
 def test_handle_missing_data():
@@ -21,7 +22,8 @@ def test_handle_missing_data():
 
 
 def test_extract_features():
-    data = pd.DataFrame({"Name": ["Kelly, Mr. James", "Dodge, Dr. Washington", "Daniels, Miss. Sarah"]})
+    data = pd.DataFrame({
+        "Name": ["Kelly, Mr. James", "Dodge, Dr. Washington", "Daniels, Miss. Sarah"]})
     processed_data = extract_features(data)
 
     assert "Title" in processed_data.columns
@@ -30,7 +32,8 @@ def test_extract_features():
 
 
 def test_encode_categorical_features():
-    data = pd.DataFrame({"Sex": ["male", "female"], "Embarked": ["S", "C"], "Title": ["Mr", "Miss"]})
+    data = pd.DataFrame({
+        "Sex": ["male", "female"], "Embarked": ["S", "C"], "Title": ["Mr", "Miss"]})
     processed_data = encode_categorical_features(data)
 
     assert "Sex_male" in processed_data.columns

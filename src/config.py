@@ -10,8 +10,9 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Przechodzi do głównego katalogu
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
 
 def load_config(config_path=CONFIG_PATH):
     """Load configuration from a JSON file."""

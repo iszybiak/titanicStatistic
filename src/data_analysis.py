@@ -9,8 +9,9 @@ logger = setup_logger()
 
 def data_analysis(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Analyzes the given data, performs basic exploration, visualizes missing values,
-    identifies outliers, and generates a summary report.
+    Analyzes the given data, performs basic exploration,
+    visualizes missing values, identifies outliers,
+    and generates a summary report.
 
     Args:
     - data (pd.DataFrame): The input dataset for analysis.
@@ -57,12 +58,14 @@ def data_analysis(data: pd.DataFrame) -> pd.DataFrame:
 
         # Identifying outliers using IQR
         if 'Age' not in data.columns or 'Fare' not in data.columns:
-            raise ValueError("Data must contain 'Age' and 'Fare' columns for outlier analysis.")
+            raise ValueError(
+                "Data must contain 'Age' and 'Fare' columns for outlier analysis.")
 
         Q1 = data[['Age', 'Fare']].quantile(0.25)
         Q3 = data[['Age', 'Fare']].quantile(0.75)
         IQR = Q3 - Q1
-        outliers = ((data[['Age', 'Fare']] < (Q1 - 1.5 * IQR)) | (data[['Age', 'Fare']] > (Q3 + 1.5 * IQR))).sum()
+        outliers = ((data[['Age', 'Fare']] < (Q1 - 1.5 * IQR))
+                    | (data[['Age', 'Fare']] > (Q3 + 1.5 * IQR))).sum()
         logger.info(f"Number of outliers: {outliers}")
     except Exception as e:
         logger.error(f"Error during outlier analysis: {e}")
@@ -76,6 +79,6 @@ def data_analysis(data: pd.DataFrame) -> pd.DataFrame:
         logger.error(f"Error visualizing distributions: {e}")
         raise ValueError("Error visualizing distributions.")
 
-    logger.info(f"Data analysis completed")
+    logger.info("Data analysis completed")
 
     return data
